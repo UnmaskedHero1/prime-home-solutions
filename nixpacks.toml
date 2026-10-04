@@ -1,0 +1,19 @@
+# Coolify build pack: Nixpacks
+# Persistent volume: mount /app/databases
+# Health check: /api/health
+
+[variables]
+NIXPACKS_PYTHON_VERSION = "3.12"
+
+[phases.setup]
+nixPkgs = ["...", "nodejs_22"]
+
+[phases.install]
+cmds = ["...", "npm ci --prefix frontend"]
+
+[phases.build]
+dependsOn = ["install"]
+cmds = ["npm run build --prefix frontend"]
+
+[start]
+cmd = "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"

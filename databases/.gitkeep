@@ -1,0 +1,3 @@
+SQLite files for this app live in this folder.
+Coolify persistent volume mount: /app/databases
+The app creates prime.db on startup. That file is not committed.
