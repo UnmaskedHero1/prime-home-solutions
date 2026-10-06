@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { submitContact } from "./api.js";
 import { business, comparisons, reviews, services } from "./content.js";
 import { useSiteMotion } from "./useSiteMotion.js";
@@ -144,22 +144,11 @@ function Work() {
         <h2>Watch the house change.</h2>
         <span className="reveal-rule" aria-hidden="true" />
         <p className="lede">
-          Scroll and the finished work wipes across the before. Scroll back up and it returns.
+          Drag the tab to show more of the before or the after. On a phone, the two photos sit side by side.
         </p>
         <div className="compare-list">
           {comparisons.map((item) => (
-            <article className="compare" key={item.title}>
-              <div className="compare-frame">
-                <img className="compare-before" src={item.before} alt={item.beforeAlt} />
-                <div className="compare-after">
-                  <img src={item.after} alt={item.afterAlt} />
-                </div>
-                <span className="compare-label is-before">Before</span>
-                <span className="compare-label is-after">After</span>
-              </div>
-              <h3>{item.title}</h3>
-              <p>{item.text}</p>
-            </article>
+            <Compare key={item.title} item={item} />
           ))}
         </div>
         <p className="fine-print">
@@ -167,6 +156,98 @@ function Work() {
         </p>
       </div>
     </section>
+  );
+}
+
+function Compare({ item }) {
+  const frameRef = useRef(null);
+  const dragRef = useRef(false);
+  const [position, setPosition] = useState(50);
+  const [wide, setWide] = useState(true);
+
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 721px)");
+    const update = () => setWide(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  function moveTo(clientX) {
+    const frame = frameRef.current;
+    if (!frame) return;
+    const rect = frame.getBoundingClientRect();
+    const next = ((clientX - rect.left) / rect.width) * 100;
+    setPosition(Math.min(98, Math.max(2, next)));
+  }
+
+  function onPointerDown(event) {
+    if (!wide) return;
+    dragRef.current = true;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    moveTo(event.clientX);
+  }
+
+  function onPointerMove(event) {
+    if (!dragRef.current) return;
+    moveTo(event.clientX);
+  }
+
+  function onPointerUp() {
+    dragRef.current = false;
+  }
+
+  function onKeyDown(event) {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      setPosition((current) => Math.max(2, current - 4));
+    }
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      setPosition((current) => Math.min(98, current + 4));
+    }
+  }
+
+  return (
+    <article className="compare">
+      <div
+        className="compare-frame"
+        ref={frameRef}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
+        <img className="compare-before" src={item.before} alt={item.beforeAlt} />
+        <div
+          className="compare-after"
+          style={wide ? { clipPath: `inset(0 ${100 - position}% 0 0)` } : undefined}
+        >
+          <img src={item.after} alt={item.afterAlt} />
+        </div>
+        <span className="compare-label is-before">Before</span>
+        <span className="compare-label is-after">After</span>
+        {wide ? (
+          <div
+            className="compare-handle"
+            role="slider"
+            tabIndex={0}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(position)}
+            aria-label={`Drag to compare ${item.title}`}
+            style={{ left: `${position}%` }}
+            onKeyDown={onKeyDown}
+          >
+            <span className="compare-tab" aria-hidden="true">
+              &lt;&gt;
+            </span>
+          </div>
+        ) : null}
+      </div>
+      <h3>{item.title}</h3>
+      <p>{item.text}</p>
+    </article>
   );
 }
 

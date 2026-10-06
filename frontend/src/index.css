@@ -54,7 +54,7 @@ textarea {
 }
 
 section[id] {
-  scroll-margin-top: 108px;
+  scroll-margin-top: 160px;
 }
 
 .container {
@@ -454,7 +454,51 @@ h3 {
 }
 
 .compare-after {
-  clip-path: inset(0 100% 0 0);
+  clip-path: inset(0 50% 0 0);
+}
+
+.compare-frame {
+  touch-action: none;
+  cursor: ew-resize;
+}
+
+.compare-handle {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  bottom: 0;
+  width: 44px;
+  transform: translateX(-50%);
+  cursor: ew-resize;
+}
+
+.compare-handle::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: #fff;
+}
+
+.compare-tab {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 34px;
+  border: 2px solid var(--gold);
+  border-radius: 999px;
+  background: var(--navy);
+  color: var(--gold-bright);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  box-shadow: 0 8px 18px rgba(14, 34, 64, 0.28);
 }
 
 .compare-label {
@@ -677,25 +721,34 @@ h3 {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
+@media (max-width: 720px) {
   .compare-frame {
     display: grid;
     grid-template-columns: 1fr 1fr;
     aspect-ratio: auto;
     gap: 0.5rem;
     background: transparent;
+    cursor: default;
+    touch-action: auto;
   }
 
   .compare-before,
   .compare-after {
     position: relative;
     inset: auto;
-    height: 200px;
-    clip-path: none;
+    height: 190px;
+    clip-path: none !important;
     overflow: hidden;
     border-radius: 14px;
   }
 
+  .compare-label,
+  .compare-handle {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
   .review-viewport {
     height: auto;
     overflow-x: auto;

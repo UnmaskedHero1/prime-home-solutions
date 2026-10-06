@@ -77,23 +77,6 @@ export function useSiteMotion(rootRef) {
         );
       });
 
-      q(".compare").forEach((block) => {
-        gsap.fromTo(
-          block.querySelector(".compare-after"),
-          { clipPath: "inset(0 100% 0 0)" },
-          {
-            clipPath: "inset(0 0% 0 0)",
-            ease: "none",
-            scrollTrigger: {
-              trigger: block,
-              start: "top 78%",
-              end: "center 48%",
-              scrub: true,
-            },
-          }
-        );
-      });
-
       const charlotte = q(".charlotte")[0];
       if (charlotte) {
         gsap.fromTo(
