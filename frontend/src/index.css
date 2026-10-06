@@ -742,9 +742,16 @@ h3 {
     border-radius: 14px;
   }
 
-  .compare-label,
+  .compare-frame {
+    overflow: visible;
+  }
+
   .compare-handle {
     display: none;
+  }
+
+  .compare-label {
+    z-index: 3;
   }
 }
 
