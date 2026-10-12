@@ -23,6 +23,14 @@ npm run dev
 
 Copy `.env.example` to `.env` if you want to change the database folder or CORS origins.
 
+## Photos
+
+Image spots are placeholders until real pictures are added. Drop files into `frontend/public/photos/` and set the paths in `frontend/src/content.js` (`pressureWashing` before/after, `lighting` items).
+
+## Hidden page
+
+`/landscaping` is a landscaping page for homes. Nothing links to it and it is marked `noindex`. Share the URL directly if that service is confirmed.
+
 ## Coolify
 
 - Build pack: Nixpacks (`nixpacks.toml`)

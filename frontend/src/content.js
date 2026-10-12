@@ -10,103 +10,128 @@ export const business = {
   slogan: "One call. We do it all. Inside & out.",
 };
 
-export const services = [
-  {
-    name: "Interior Painting",
-    detail: "Walls, ceilings, and trim inside the house.",
-  },
+export const serviceFamilies = [
   {
     name: "Pressure Washing",
-    detail: "Siding, driveways, and the film that builds up outside.",
+    anchor: "#pressure-washing",
+    options: [
+      { audience: "Homes", detail: "Siding, driveways, walkways, and decks." },
+      { audience: "Businesses", detail: "Storefronts, sidewalks, and parking areas." },
+    ],
   },
   {
-    name: "Gutter Cleaning",
-    detail: "Clear gutters so water can leave the roof.",
+    name: "Painting",
+    options: [
+      { audience: "Homes", detail: "Interior and exterior paint for the house." },
+      { audience: "Businesses", detail: "Offices, storefronts, and commercial spaces." },
+    ],
   },
   {
-    name: "Yard Clean Up",
-    detail: "A reset for the yard around the house.",
+    name: "Light Installation",
+    anchor: "#lighting",
+    options: [
+      { audience: "Homes", detail: "Fixtures, ceiling lights, and outdoor lighting." },
+      { audience: "Businesses", detail: "Lighting for shops, offices, and signs." },
+    ],
   },
   {
-    name: "Trash Outs & Garage Clean Outs",
-    detail: "Haul-outs when a property needs to be emptied.",
-  },
-  {
-    name: "HVAC Repair",
-    detail: "Service and repair when the system is not keeping up.",
-  },
-  {
-    name: "HVAC Install",
-    detail: "A new system set in place of one that is finished.",
-  },
-  {
-    name: "Roofing",
-    detail: "Roof repair and replacement for Charlotte homes.",
+    name: "Tree Trimming",
+    options: [{ audience: "Homes", detail: "Trimming and shaping the trees around the house." }],
   },
 ];
 
-export const comparisons = [
+export const serviceOptions = serviceFamilies.flatMap((family) =>
+  family.options.map((option) => `${family.name} · ${option.audience}`)
+);
+
+// Set `before` and `after` to image paths (for example "/photos/wash-home-before.jpg")
+// once the pressure washing pictures are added to frontend/public/photos.
+export const pressureWashing = [
   {
-    title: "Interior painting",
-    text: "A tired room, then a clean coat on the walls and trim.",
-    before: "/photos/prime-paint-before.jpg",
-    after: "/photos/prime-paint-after.jpg",
-    beforeAlt: "An empty room with scuffed beige walls and worn carpet",
-    afterAlt: "A bright room with fresh white paint and new flooring",
+    title: "Homes",
+    text: "Siding, concrete, and the film that builds up on a house.",
+    before: null,
+    after: null,
+    beforeLabel: "Before photo · home",
+    afterLabel: "After photo · home",
   },
   {
-    title: "Roofing",
-    text: "Worn shingles, then a new roof on a brick Charlotte house.",
-    before: "/photos/prime-roof-before.jpg",
-    after: "/photos/prime-roof-after.jpg",
-    beforeAlt: "A brick ranch with a stained, worn shingle roof",
-    afterAlt: "A brick home with a new charcoal shingle roof",
-  },
-  {
-    title: "HVAC",
-    text: "An old condenser, then a new unit set on a clean pad.",
-    before: "/photos/prime-hvac-before.jpg",
-    after: "/photos/prime-hvac-after.jpg",
-    beforeAlt: "An old, dirty outdoor air conditioner on a stained pad",
-    afterAlt: "A new outdoor air conditioner on a clean concrete pad",
+    title: "Businesses",
+    text: "Storefronts, walkways, and the areas customers see first.",
+    before: null,
+    after: null,
+    beforeLabel: "Before photo · business",
+    afterLabel: "After photo · business",
   },
 ];
+
+// Set `src` to an image path once the light installation pictures are added.
+export const lighting = [
+  {
+    group: "Homes",
+    items: [
+      { stage: "During install", src: null },
+      { stage: "After", src: null },
+    ],
+  },
+  {
+    group: "Businesses",
+    items: [
+      { stage: "During install", src: null },
+      { stage: "After", src: null },
+    ],
+  },
+];
+
+export const landscaping = {
+  path: "/landscaping",
+  name: "Landscaping",
+  audience: "Homes",
+  intro:
+    "Planting and tending the beds, shrubs, and plants around a Charlotte home. Call and say what the yard needs.",
+  points: [
+    "Planting beds, shrubs, and seasonal plants",
+    "Tending plants and beds through the season",
+    "Mulch, edging, and cleanup around the yard",
+  ],
+  photos: ["Planting photo", "Finished bed photo", "Seasonal upkeep photo"],
+};
 
 export const reviews = [
   {
     name: "Andrea",
     area: "Charlotte",
-    service: "Interior Painting",
-    quote: "He painted the bedrooms and the trim came out clean. Easy to get on the phone.",
+    service: "Pressure Washing · Homes",
+    quote: "The siding and the driveway look like the house again. Easy to get on the phone.",
   },
   {
     name: "Marcus",
     area: "Charlotte",
-    service: "HVAC Install",
-    quote: "The new unit is quiet, and the house cools the way it should.",
+    service: "Light Installation · Businesses",
+    quote: "New lights in the shop went in clean, and the place is brighter for customers.",
   },
   {
     name: "Denise",
     area: "Charlotte",
-    service: "Roofing",
-    quote: "They replaced the worn shingles and left the yard the way they found it.",
+    service: "Painting · Homes",
+    quote: "He painted the bedrooms and the trim came out clean.",
   },
   {
     name: "Chris",
     area: "Charlotte",
-    service: "HVAC Repair",
-    quote: "The system was struggling. He got it running again without a runaround.",
+    service: "Tree Trimming · Homes",
+    quote: "The oaks were hanging over the roof. He trimmed them back and hauled everything off.",
   },
   {
     name: "Lauren",
     area: "Charlotte",
-    service: "Pressure Washing",
-    quote: "The driveway and the siding look like the house again.",
+    service: "Pressure Washing · Businesses",
+    quote: "The storefront sidewalk had years on it. One wash and it reads clean.",
   },
   {
     name: "James",
     area: "Charlotte",
-    service: "Gutter Cleaning",
-    quote: "Gutters were packed. One call, and the water had somewhere to go.",
+    service: "Painting · Businesses",
+    quote: "Office walls done over a weekend, no mess left behind.",
   },
 ];

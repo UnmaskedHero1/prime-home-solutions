@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { submitContact } from "./api.js";
-import { business, comparisons, reviews, services } from "./content.js";
+import {
+  business,
+  landscaping,
+  lighting,
+  pressureWashing,
+  reviews,
+  serviceFamilies,
+  serviceOptions,
+} from "./content.js";
 import { useSiteMotion } from "./useSiteMotion.js";
 
 const emptyForm = {
@@ -11,32 +19,139 @@ const emptyForm = {
   message: "",
 };
 
+const homeLinks = [
+  { href: "#services", label: "Services" },
+  { href: "#pressure-washing", label: "Pressure Washing" },
+  { href: "#lighting", label: "Lighting" },
+  { href: "#owner", label: "Owner" },
+  { href: "#reviews", label: "Reviews" },
+  { href: "#contact", label: "Contact" },
+];
+
+const landscapingLinks = [
+  { href: "/", label: "Home" },
+  { href: "#contact", label: "Contact" },
+];
+
+function currentPath() {
+  const path = window.location.pathname.replace(/\/+$/, "");
+  return path || "/";
+}
+
 export default function App() {
   const rootRef = useRef(null);
   useSiteMotion(rootRef);
+  const isLandscaping = currentPath() === landscaping.path;
 
   return (
     <div className="page" ref={rootRef}>
-      <Header />
-      <main>
-        <Hero />
-        <Services />
-        <Work />
-        <Charlotte />
-        <Owner />
-        <Reviews />
-        <Contact />
-      </main>
-      <Footer />
+      {isLandscaping ? <LandscapingPage /> : <HomePage />}
     </div>
   );
 }
 
-function Header() {
+function HomePage() {
+  return (
+    <>
+      <Header links={homeLinks} home="#top" />
+      <main>
+        <Hero />
+        <Services />
+        <PressureWashing />
+        <Lighting />
+        <Charlotte />
+        <Owner />
+        <Reviews />
+        <Contact options={serviceOptions} />
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+function LandscapingPage() {
+  useEffect(() => {
+    const previous = document.title;
+    document.title = `${landscaping.name} · ${business.name}`;
+    const meta = document.createElement("meta");
+    meta.name = "robots";
+    meta.content = "noindex";
+    document.head.appendChild(meta);
+    return () => {
+      document.title = previous;
+      meta.remove();
+    };
+  }, []);
+
+  const options = [`${landscaping.name} · ${landscaping.audience}`, ...serviceOptions];
+
+  return (
+    <>
+      <Header links={landscapingLinks} home="/" />
+      <main>
+        <section className="hero" id="top">
+          <div className="container hero-grid">
+            <div>
+              <p className="eyebrow">
+                {business.area} · {landscaping.audience}
+              </p>
+              <h1>
+                <span>Landscaping</span>
+                <span className="gold">for the home.</span>
+              </h1>
+              <span className="hero-rule" aria-hidden="true" />
+              <p className="tagline">{landscaping.intro}</p>
+              <div className="hero-actions">
+                <a className="btn btn-navy" href={business.phoneHref}>
+                  Call now
+                </a>
+                <a className="btn btn-line" href="#contact">
+                  Request a visit
+                </a>
+              </div>
+            </div>
+            <ul className="service-panel">
+              {landscaping.points.map((point) => (
+                <li key={point}>
+                  <ServiceIcon name="Landscaping" />
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <section className="band" id="photos">
+          <div className="container">
+            <p className="eyebrow">The yard</p>
+            <h2>Beds, plants, and upkeep.</h2>
+            <span className="reveal-rule" aria-hidden="true" />
+            <p className="lede">Photos of planting and finished beds will go here.</p>
+            <div className="feature-grid">
+              {landscaping.photos.map((label) => (
+                <figure className="feature-card" key={label}>
+                  <div className="feature-frame">
+                    <PhotoSlot label={label} />
+                  </div>
+                  <figcaption>{label}</figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <Contact options={options} defaultService={options[0]} />
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+function Header({ links, home }) {
   return (
     <header className="site-header">
       <div className="container header-inner">
-        <a className="brand" href="#top">
+        <a className="brand" href={home}>
           <HouseMark />
           <span className="brand-text">
             <span className="brand-name">Prime</span>
@@ -44,11 +159,11 @@ function Header() {
           </span>
         </a>
         <nav aria-label="Primary">
-          <a href="#services">Services</a>
-          <a href="#work">Work</a>
-          <a href="#owner">Owner</a>
-          <a href="#reviews">Reviews</a>
-          <a href="#contact">Contact</a>
+          {links.map((link) => (
+            <a key={link.href} href={link.href}>
+              {link.label}
+            </a>
+          ))}
           <a className="btn btn-gold" href={business.phoneHref}>
             {business.phoneDisplay}
           </a>
@@ -73,8 +188,8 @@ function Hero() {
           </h1>
           <span className="hero-rule" aria-hidden="true" />
           <p className="tagline">
-            Paint, HVAC repair, HVAC install, roofing, and the rest of the house.
-            Prime Home Solutions works with homeowners around {business.area}.
+            Pressure washing, painting, light installation, and tree trimming for homes and businesses
+            around {business.area}.
           </p>
           <div className="hero-actions">
             <a className="btn btn-navy" href={business.phoneHref}>
@@ -86,26 +201,15 @@ function Hero() {
           </div>
         </div>
         <ul className="service-panel">
-          <li>
-            <ServiceIcon name="Interior Painting" />
-            <span>Interior painting</span>
-          </li>
-          <li>
-            <ServiceIcon name="HVAC Repair" />
-            <span>HVAC repair and install</span>
-          </li>
-          <li>
-            <ServiceIcon name="Roofing" />
-            <span>Roofing</span>
-          </li>
-          <li>
-            <ServiceIcon name="Pressure Washing" />
-            <span>Pressure washing and gutters</span>
-          </li>
-          <li>
-            <ServiceIcon name="Yard Clean Up" />
-            <span>Yard clean up and trash outs</span>
-          </li>
+          {serviceFamilies.map((family) => (
+            <li key={family.name}>
+              <ServiceIcon name={family.name} />
+              <span>
+                {family.name}
+                <small>{family.options.map((option) => option.audience).join(" · ")}</small>
+              </span>
+            </li>
+          ))}
         </ul>
       </div>
     </section>
@@ -117,17 +221,29 @@ function Services() {
     <section className="band" id="services">
       <div className="container">
         <p className="eyebrow">Services</p>
-        <h2>The work, inside and out.</h2>
+        <h2>Homes and businesses.</h2>
         <span className="reveal-rule" aria-hidden="true" />
         <p className="lede">
-          One call covers the house. Mr. Armas takes painting, HVAC, roofing, and the cleanup that comes with it.
+          One call covers the property. Each service below says who it is for.
         </p>
         <div className="service-grid">
-          {services.map((service) => (
-            <article className="service-card" key={service.name}>
-              <ServiceIcon name={service.name} />
-              <h3>{service.name}</h3>
-              <p>{service.detail}</p>
+          {serviceFamilies.map((family) => (
+            <article className="service-card" key={family.name}>
+              <ServiceIcon name={family.name} />
+              <h3>{family.name}</h3>
+              <ul className="option-list">
+                {family.options.map((option) => (
+                  <li key={option.audience}>
+                    <span className="tag">{option.audience}</span>
+                    <span>{option.detail}</span>
+                  </li>
+                ))}
+              </ul>
+              {family.anchor ? (
+                <a className="card-link" href={family.anchor}>
+                  See the work
+                </a>
+              ) : null}
             </article>
           ))}
         </div>
@@ -136,26 +252,67 @@ function Services() {
   );
 }
 
-function Work() {
+function PressureWashing() {
   return (
-    <section className="band band-tight" id="work">
+    <section className="band band-tight" id="pressure-washing">
       <div className="container">
-        <p className="eyebrow">Before and after</p>
-        <h2>Watch the house change.</h2>
+        <p className="eyebrow">Pressure washing</p>
+        <h2>Before and after.</h2>
         <span className="reveal-rule" aria-hidden="true" />
         <p className="lede">
           Drag the tab to show more of the before or the after. On a phone, the two photos sit side by side.
         </p>
         <div className="compare-list">
-          {comparisons.map((item) => (
+          {pressureWashing.map((item) => (
             <Compare key={item.title} item={item} />
           ))}
         </div>
-        <p className="fine-print">
-          Example photos for this preview. Real jobs can replace them.
-        </p>
       </div>
     </section>
+  );
+}
+
+function Lighting() {
+  return (
+    <section className="band" id="lighting">
+      <div className="container">
+        <p className="eyebrow">Light installation</p>
+        <h2>Going in, then lit up.</h2>
+        <span className="reveal-rule" aria-hidden="true" />
+        <p className="lede">Lights during the install, and how they look once they are on.</p>
+        {lighting.map((group) => (
+          <div className="light-group" key={group.group}>
+            <h3>{group.group}</h3>
+            <div className="light-grid">
+              {group.items.map((item) => (
+                <figure className="light-tile" key={item.stage}>
+                  <div className="light-frame">
+                    <PhotoSlot src={item.src} alt={`${group.group}: ${item.stage}`} label={`${group.group} · ${item.stage}`} />
+                  </div>
+                  <figcaption>{item.stage}</figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function PhotoSlot({ src, alt, label, className = "" }) {
+  if (src) {
+    return <img className={className} src={src} alt={alt || label} />;
+  }
+  return (
+    <div className={`photo-slot ${className}`.trim()} role="img" aria-label={label}>
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <circle cx="9" cy="10" r="1.6" />
+        <path d="M21 16l-5-5-8 8" />
+      </svg>
+      <span>{label}</span>
+    </div>
   );
 }
 
@@ -218,12 +375,12 @@ function Compare({ item }) {
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
-        <img className="compare-before" src={item.before} alt={item.beforeAlt} />
+        <PhotoSlot className="compare-before" src={item.before} label={item.beforeLabel} />
         <div
           className="compare-after"
-          style={wide ? { clipPath: `inset(0 ${100 - position}% 0 0)` } : undefined}
+          style={wide ? { clipPath: `inset(0 0 0 ${position}%)` } : undefined}
         >
-          <img src={item.after} alt={item.afterAlt} />
+          <PhotoSlot src={item.after} label={item.afterLabel} />
         </div>
         <span className="compare-label is-before">Before</span>
         <span className="compare-label is-after">After</span>
@@ -258,9 +415,9 @@ function Charlotte() {
         <p className="drift-line drift-left">Charlotte</p>
         <p className="drift-line drift-right">Inside &amp; out</p>
         <p className="charlotte-copy">
-          Prime Home Solutions is for homeowners around Charlotte who want one person for the house.
-          Painting, HVAC repair, HVAC install, roofing, pressure washing, gutters, yard clean up, and trash outs.
-          Call {business.owner} and tell him what the home needs.
+          Prime Home Solutions is for homes and businesses around Charlotte that want one person for the
+          property. Pressure washing, painting, light installation, and tree trimming. Call {business.owner}{" "}
+          and say what the place needs.
         </p>
         <a className="btn btn-gold" href={business.phoneHref}>
           Call {business.phoneDisplay}
@@ -275,20 +432,15 @@ function Owner() {
     <section className="owner" id="owner">
       <div className="container owner-grid">
         <figure className="owner-frame">
-          <img
-            className="owner-photo"
-            src="/photos/prime-owner-home.jpg"
-            alt="A brick Charlotte home with a front porch in late-day light"
-          />
+          <PhotoSlot className="owner-photo" label={`Photo of ${business.owner}`} />
         </figure>
         <div className="owner-copy">
           <p className="eyebrow">Meet the owner</p>
           <h2>{business.owner}</h2>
           <span className="reveal-rule" aria-hidden="true" />
           <p>
-            {business.owner} owns {business.name}. He is the person on the phone.
-            Homes around {business.area} reach him for paint, a roof, HVAC repair or a new install,
-            and the cleanup that gets a property ready.
+            {business.owner} owns {business.name}. He is the person on the phone. Homes and businesses
+            around {business.area} reach him for pressure washing, paint, new lights, and tree trimming.
           </p>
           <p>{business.tagline}</p>
           <p className="owner-meta">
@@ -345,8 +497,8 @@ function Reviews() {
   );
 }
 
-function Contact() {
-  const [form, setForm] = useState(emptyForm);
+function Contact({ options, defaultService = "" }) {
+  const [form, setForm] = useState({ ...emptyForm, service: defaultService });
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
 
@@ -372,7 +524,7 @@ function Contact() {
     try {
       await submitContact(form);
       setStatus("sent");
-      setForm(emptyForm);
+      setForm({ ...emptyForm, service: defaultService });
     } catch (err) {
       setStatus("idle");
       setError(err.message || "Something went wrong. Call us and we will take it from there.");
@@ -383,11 +535,11 @@ function Contact() {
     <section className="contact" id="contact">
       <div className="container contact-grid">
         <div className="contact-copy">
-          <p className="eyebrow on-navy">Charlotte home needs</p>
+          <p className="eyebrow on-navy">Charlotte home and business needs</p>
           <h2>Get in touch</h2>
           <p className="slogan">{business.slogan}</p>
           <p>
-            Tell {business.owner} what the house needs. Paint, HVAC, roofing, or a clean-out.
+            Tell {business.owner} what the property needs. A wash, paint, new lights, or the trees.
             He will take it from there.
           </p>
           <ul className="contact-list">
@@ -423,16 +575,16 @@ function Contact() {
               Service
               <select name="service" value={form.service} onChange={update}>
                 <option value="">Select a service</option>
-                {services.map((service) => (
-                  <option key={service.name} value={service.name}>
-                    {service.name}
+                {options.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
                   </option>
                 ))}
               </select>
             </label>
           </div>
           <label>
-            What does the house need?
+            What does the property need?
             <textarea name="message" value={form.message} onChange={update} rows={5} />
           </label>
           <button className="btn btn-navy" type="submit" disabled={status === "sending"}>
@@ -490,15 +642,6 @@ function ServiceIcon({ name }) {
     "aria-hidden": true,
   };
 
-  if (name === "Interior Painting") {
-    return (
-      <svg {...props}>
-        <path d="M4 5h10a3 3 0 0 1 0 6H8" />
-        <path d="M8 11v3a2 2 0 0 0 2 2h0a2 2 0 0 1 2 2v1" />
-        <path d="M14 4v3" />
-      </svg>
-    );
-  }
   if (name === "Pressure Washing") {
     return (
       <svg {...props}>
@@ -509,48 +652,37 @@ function ServiceIcon({ name }) {
       </svg>
     );
   }
-  if (name === "Gutter Cleaning") {
+  if (name === "Painting") {
     return (
       <svg {...props}>
-        <path d="M3 10 L12 4 L21 10" />
-        <path d="M4 10h16" />
-        <path d="M18 10v3a2 2 0 0 1-2 2h-1" />
-        <path d="M8 19c0-2 2-2 2-4" />
+        <path d="M4 5h10a3 3 0 0 1 0 6H8" />
+        <path d="M8 11v3a2 2 0 0 0 2 2h0a2 2 0 0 1 2 2v1" />
+        <path d="M14 4v3" />
       </svg>
     );
   }
-  if (name === "Yard Clean Up") {
+  if (name === "Light Installation") {
     return (
       <svg {...props}>
-        <path d="M5 19c4-1 6-5 7-9 1 4 3 8 7 9" />
-        <path d="M12 10V5" />
-        <path d="M12 7c2-2 4-1 4 1" />
+        <path d="M9 18h6" />
+        <path d="M10 21h4" />
+        <path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.3 1 2.1h5c0-.8.4-1.6 1-2.1A6 6 0 0 0 12 3z" />
       </svg>
     );
   }
-  if (name === "HVAC Repair" || name === "HVAC Install") {
+  if (name === "Tree Trimming") {
     return (
       <svg {...props}>
-        <rect x="4" y="4" width="16" height="16" rx="2" />
-        <circle cx="12" cy="12" r="3.5" />
-        <path d="M12 6.5v2M12 15.5v2M6.5 12h2M15.5 12h2" />
-      </svg>
-    );
-  }
-  if (name === "Roofing") {
-    return (
-      <svg {...props}>
-        <path d="M3 12 L12 4 L21 12" />
-        <path d="M6 11.5 V20 H18 V11.5" />
-        <path d="M10 20v-4h4v4" />
+        <path d="M12 21v-5" />
+        <path d="M8 16h8l-2-4h1.5l-2.5-4h1l-2-4-2 4h1l-2.5 4H10z" />
       </svg>
     );
   }
   return (
     <svg {...props}>
-      <path d="M6 8h12l-1 12H7L6 8z" />
-      <path d="M9 8V6a3 3 0 0 1 6 0v2" />
-      <path d="M10 12v5M14 12v5" />
+      <path d="M5 19c4-1 6-5 7-9 1 4 3 8 7 9" />
+      <path d="M12 10V5" />
+      <path d="M12 7c2-2 4-1 4 1" />
     </svg>
   );
 }
