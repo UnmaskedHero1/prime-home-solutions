@@ -6,12 +6,13 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
+from admin import router as admin_router
 from config import settings
 from database import Base, engine
 from routes import router
 
 DIST = Path(__file__).resolve().parent / "frontend" / "dist"
-IMAGES = settings.resolved_database_dir / "images"
+IMAGES = settings.images_dir
 log = logging.getLogger("prime")
 
 
@@ -24,6 +25,8 @@ async def lifespan(_app: FastAPI):
 
     Base.metadata.create_all(bind=engine)
     log.info("Database ready at %s", settings.database_path.resolve())
+    if not settings.admin_password:
+        log.warning("ADMIN_PASSWORD is not set. The /admin page cannot sign in.")
     yield
 
 
@@ -31,10 +34,12 @@ app = FastAPI(title="Prime Home Solutions LLC", version="0.1.0", lifespan=lifesp
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type"],
+    allow_credentials=True,
 )
 app.include_router(router, prefix="/api")
+app.include_router(admin_router, prefix="/api")
 
 
 @app.get("/images/{name:path}")

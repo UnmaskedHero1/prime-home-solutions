@@ -23,15 +23,17 @@ npm run dev
 
 Copy `.env.example` to `.env` if you want to change the database folder or CORS origins.
 
-## Photos
+## Photos and the admin page
 
-Image spots are placeholders until real pictures are added. Upload files to `databases/images/` and they are served at `/images/<filename>`. Then set the paths in `frontend/src/content.js` (`pressureWashing` before/after, `lighting` items), for example `"/images/wash-home-before.jpg"`.
+Go to `/admin` and sign in with `ADMIN_PASSWORD` to change the photos on the site. Each photo spot can take an upload, or use a file already in `databases/images/`. Uploads are resized and saved to `databases/images/`, and the spot-to-file mapping is stored in SQLite, so both live on the Coolify volume and survive redeploys.
 
-On Coolify, `databases/images/` sits on the `/app/databases` volume, so uploads survive redeploys. Pictures can also be committed to `frontend/public/photos/` and used as `/photos/<filename>`.
+Default photos ship in `frontend/public/photos/` and show until a spot gets an upload. Files in `databases/images/` are served at `/images/<filename>`.
+
+Set `ADMIN_PASSWORD` in Coolify's environment variables. Without it, `/admin` cannot sign in.
 
 ## Hidden page
 
-`/landscaping` is a landscaping page for homes. Nothing links to it and it is marked `noindex`. Share the URL directly if that service is confirmed.
+`/landscaping` is a landscaping page for homes. Nothing links to it and it is marked `noindex`. Share the URL directly if that service is confirmed. `/admin` is also unlinked and `noindex`.
 
 ## Coolify
 

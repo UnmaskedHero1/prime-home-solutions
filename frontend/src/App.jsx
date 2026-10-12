@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from "react";
+import Admin from "./Admin.jsx";
 import { submitContact } from "./api.js";
 import {
   business,
+  comparisons,
   landscaping,
-  lighting,
-  pressureWashing,
+  ownerPhoto,
   reviews,
   serviceFamilies,
   serviceOptions,
+  singles,
 } from "./content.js";
+import { GalleryProvider, usePhoto } from "./gallery.jsx";
 import { useSiteMotion } from "./useSiteMotion.js";
 
 const emptyForm = {
@@ -21,8 +24,7 @@ const emptyForm = {
 
 const homeLinks = [
   { href: "#services", label: "Services" },
-  { href: "#pressure-washing", label: "Pressure Washing" },
-  { href: "#lighting", label: "Lighting" },
+  { href: "#pressure-washing", label: "Work" },
   { href: "#owner", label: "Owner" },
   { href: "#reviews", label: "Reviews" },
   { href: "#contact", label: "Contact" },
@@ -39,9 +41,20 @@ function currentPath() {
 }
 
 export default function App() {
+  const path = currentPath();
+  if (path === "/admin") {
+    return <Admin />;
+  }
+  return (
+    <GalleryProvider>
+      <Site isLandscaping={path === landscaping.path} />
+    </GalleryProvider>
+  );
+}
+
+function Site({ isLandscaping }) {
   const rootRef = useRef(null);
   useSiteMotion(rootRef);
-  const isLandscaping = currentPath() === landscaping.path;
 
   return (
     <div className="page" ref={rootRef}>
@@ -57,8 +70,21 @@ function HomePage() {
       <main>
         <Hero />
         <Services />
-        <PressureWashing />
-        <Lighting />
+        <CompareSection
+          id="pressure-washing"
+          eyebrow="Pressure washing"
+          title="Before and after."
+          lede="Drag the tab to show more of the before or the after. On a phone, the two photos sit side by side."
+          items={comparisons["pressure-washing"]}
+        />
+        <CompareSection
+          id="painting"
+          eyebrow="Painting"
+          title="Fresh walls."
+          lede="Homes and businesses. Drag the tab to compare."
+          items={comparisons.painting}
+        />
+        <Singles />
         <Charlotte />
         <Owner />
         <Reviews />
@@ -128,12 +154,12 @@ function LandscapingPage() {
             <span className="reveal-rule" aria-hidden="true" />
             <p className="lede">Photos of planting and finished beds will go here.</p>
             <div className="feature-grid">
-              {landscaping.photos.map((label) => (
-                <figure className="feature-card" key={label}>
+              {landscaping.photos.map((item) => (
+                <figure className="feature-card" key={item.photo.slot}>
                   <div className="feature-frame">
-                    <PhotoSlot label={label} />
+                    <PhotoSlot photo={item.photo} label={item.label} />
                   </div>
-                  <figcaption>{label}</figcaption>
+                  <figcaption>{item.label}</figcaption>
                 </figure>
               ))}
             </div>
@@ -252,18 +278,16 @@ function Services() {
   );
 }
 
-function PressureWashing() {
+function CompareSection({ id, eyebrow, title, lede, items }) {
   return (
-    <section className="band band-tight" id="pressure-washing">
+    <section className="band band-tight" id={id}>
       <div className="container">
-        <p className="eyebrow">Pressure washing</p>
-        <h2>Before and after.</h2>
+        <p className="eyebrow">{eyebrow}</p>
+        <h2>{title}</h2>
         <span className="reveal-rule" aria-hidden="true" />
-        <p className="lede">
-          Drag the tab to show more of the before or the after. On a phone, the two photos sit side by side.
-        </p>
+        <p className="lede">{lede}</p>
         <div className="compare-list">
-          {pressureWashing.map((item) => (
+          {items.map((item) => (
             <Compare key={item.title} item={item} />
           ))}
         </div>
@@ -272,37 +296,37 @@ function PressureWashing() {
   );
 }
 
-function Lighting() {
+function Singles() {
   return (
-    <section className="band" id="lighting">
+    <section className="band" id="lights-and-trees">
       <div className="container">
-        <p className="eyebrow">Light installation</p>
-        <h2>Going in, then lit up.</h2>
+        <p className="eyebrow">Lights and trees</p>
+        <h2>On the ladder.</h2>
         <span className="reveal-rule" aria-hidden="true" />
-        <p className="lede">Lights during the install, and how they look once they are on.</p>
-        {lighting.map((group) => (
-          <div className="light-group" key={group.group}>
-            <h3>{group.group}</h3>
-            <div className="light-grid">
-              {group.items.map((item) => (
-                <figure className="light-tile" key={item.stage}>
-                  <div className="light-frame">
-                    <PhotoSlot src={item.src} alt={`${group.group}: ${item.stage}`} label={`${group.group} · ${item.stage}`} />
-                  </div>
-                  <figcaption>{item.stage}</figcaption>
-                </figure>
-              ))}
-            </div>
-          </div>
-        ))}
+        <p className="lede">Light installation and tree trimming, one photo each.</p>
+        <div className="light-grid">
+          {singles.map((item) => (
+            <figure className="light-tile" key={item.photo.slot}>
+              <div className="light-frame">
+                <PhotoSlot photo={item.photo} label={`${item.title} · ${item.audience}`} />
+              </div>
+              <figcaption>
+                <span className="tag">{item.audience}</span>
+                <strong>{item.title}</strong>
+                <span>{item.text}</span>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
-function PhotoSlot({ src, alt, label, className = "" }) {
+function PhotoSlot({ photo, alt, label, className = "" }) {
+  const src = usePhoto(photo);
   if (src) {
-    return <img className={className} src={src} alt={alt || label} />;
+    return <img className={className} src={src} alt={alt || label} loading="lazy" />;
   }
   return (
     <div className={`photo-slot ${className}`.trim()} role="img" aria-label={label}>
@@ -375,12 +399,12 @@ function Compare({ item }) {
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
-        <PhotoSlot className="compare-before" src={item.before} label={item.beforeLabel} />
+        <PhotoSlot className="compare-before" photo={item.before} label={`Before photo · ${item.title.toLowerCase()}`} />
         <div
           className="compare-after"
           style={wide ? { clipPath: `inset(0 0 0 ${position}%)` } : undefined}
         >
-          <PhotoSlot src={item.after} label={item.afterLabel} />
+          <PhotoSlot photo={item.after} label={`After photo · ${item.title.toLowerCase()}`} />
         </div>
         <span className="compare-label is-before">Before</span>
         <span className="compare-label is-after">After</span>
@@ -432,7 +456,7 @@ function Owner() {
     <section className="owner" id="owner">
       <div className="container owner-grid">
         <figure className="owner-frame">
-          <PhotoSlot className="owner-photo" label={`Photo of ${business.owner}`} />
+          <PhotoSlot className="owner-photo" photo={ownerPhoto} label={`Photo of ${business.owner}`} />
         </figure>
         <div className="owner-copy">
           <p className="eyebrow">Meet the owner</p>

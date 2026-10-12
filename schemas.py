@@ -27,3 +27,18 @@ class ContactIn(BaseModel):
 class ContactOut(BaseModel):
     id: int
     detail: str = "Request received. We will be in touch."
+
+
+class LoginIn(BaseModel):
+    password: str = Field(max_length=200)
+
+
+class UseFileIn(BaseModel):
+    filename: str = Field(max_length=255)
+
+
+class SlotOut(BaseModel):
+    slot: str
+    label: str
+    url: str | None
+    filename: str | None

@@ -21,6 +21,7 @@ export const serviceFamilies = [
   },
   {
     name: "Painting",
+    anchor: "#painting",
     options: [
       { audience: "Homes", detail: "Interior and exterior paint for the house." },
       { audience: "Businesses", detail: "Offices, storefronts, and commercial spaces." },
@@ -28,7 +29,7 @@ export const serviceFamilies = [
   },
   {
     name: "Light Installation",
-    anchor: "#lighting",
+    anchor: "#lights-and-trees",
     options: [
       { audience: "Homes", detail: "Fixtures, ceiling lights, and outdoor lighting." },
       { audience: "Businesses", detail: "Lighting for shops, offices, and signs." },
@@ -36,6 +37,7 @@ export const serviceFamilies = [
   },
   {
     name: "Tree Trimming",
+    anchor: "#lights-and-trees",
     options: [{ audience: "Homes", detail: "Trimming and shaping the trees around the house." }],
   },
 ];
@@ -44,45 +46,61 @@ export const serviceOptions = serviceFamilies.flatMap((family) =>
   family.options.map((option) => `${family.name} · ${option.audience}`)
 );
 
-// Set `before` and `after` to image paths once the pictures are uploaded.
-// Files in databases/images/ are served at /images/<filename>,
-// for example "/images/wash-home-before.jpg".
-export const pressureWashing = [
+// Each photo spot has a `slot` (what the /admin page uploads into) and an
+// optional `src` default that ships with the site. An admin upload wins.
+export const comparisons = {
+  "pressure-washing": [
+    {
+      title: "Homes",
+      text: "A front walkway, before and after a wash.",
+      before: { slot: "pressure-washing-homes-before", src: "/photos/pressure-washing-homes-before.jpg" },
+      after: { slot: "pressure-washing-homes-after", src: "/photos/pressure-washing-homes-after.jpg" },
+    },
+    {
+      title: "Businesses",
+      text: "Storefronts, walkways, and the areas customers see first.",
+      before: { slot: "pressure-washing-businesses-before" },
+      after: { slot: "pressure-washing-businesses-after" },
+    },
+  ],
+  painting: [
+    {
+      title: "Homes",
+      text: "Interior and exterior paint for the house.",
+      before: { slot: "painting-homes-before" },
+      after: { slot: "painting-homes-after" },
+    },
+    {
+      title: "Businesses",
+      text: "A commercial wall finished in a textured plaster look.",
+      before: { slot: "painting-businesses-before" },
+      after: { slot: "painting-businesses-after", src: "/photos/painting-businesses-after.jpg" },
+    },
+  ],
+};
+
+export const singles = [
   {
-    title: "Homes",
-    text: "Siding, concrete, and the film that builds up on a house.",
-    before: null,
-    after: null,
-    beforeLabel: "Before photo · home",
-    afterLabel: "After photo · home",
+    title: "Light Installation",
+    audience: "Homes",
+    text: "An outdoor fixture going in beside the garage.",
+    photo: { slot: "light-installation-homes", src: "/photos/light-installation-homes.jpg" },
   },
   {
-    title: "Businesses",
-    text: "Storefronts, walkways, and the areas customers see first.",
-    before: null,
-    after: null,
-    beforeLabel: "Before photo · business",
-    afterLabel: "After photo · business",
+    title: "Light Installation",
+    audience: "Businesses",
+    text: "Lighting for shops, offices, and signs.",
+    photo: { slot: "light-installation-businesses" },
+  },
+  {
+    title: "Tree Trimming",
+    audience: "Homes",
+    text: "Limbs cut back from the roofline.",
+    photo: { slot: "tree-trimming-homes", src: "/photos/tree-trimming-homes.jpg" },
   },
 ];
 
-// Set `src` to an image path once the light installation pictures are added.
-export const lighting = [
-  {
-    group: "Homes",
-    items: [
-      { stage: "During install", src: null },
-      { stage: "After", src: null },
-    ],
-  },
-  {
-    group: "Businesses",
-    items: [
-      { stage: "During install", src: null },
-      { stage: "After", src: null },
-    ],
-  },
-];
+export const ownerPhoto = { slot: "owner", src: "/photos/owner.jpg" };
 
 export const landscaping = {
   path: "/landscaping",
@@ -95,7 +113,11 @@ export const landscaping = {
     "Tending plants and beds through the season",
     "Mulch, edging, and cleanup around the yard",
   ],
-  photos: ["Planting photo", "Finished bed photo", "Seasonal upkeep photo"],
+  photos: [
+    { label: "Setting a new bed along the walk", photo: { slot: "landscaping-1", src: "/photos/landscaping-1.jpg" } },
+    { label: "Finished bed photo", photo: { slot: "landscaping-2" } },
+    { label: "Seasonal upkeep photo", photo: { slot: "landscaping-3" } },
+  ],
 };
 
 export const reviews = [

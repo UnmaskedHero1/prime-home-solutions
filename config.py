@@ -10,12 +10,20 @@ class Settings(BaseSettings):
 
     database_dir: Path = Path("databases")
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+    # Password for the /admin page. Leave empty to disable admin login.
+    admin_password: str = ""
+    admin_session_days: int = 30
+    max_upload_mb: int = 25
 
     @property
     def resolved_database_dir(self) -> Path:
         if self.database_dir.is_absolute():
             return self.database_dir
         return ROOT / self.database_dir
+
+    @property
+    def images_dir(self) -> Path:
+        return self.resolved_database_dir / "images"
 
     @property
     def database_path(self) -> Path:
