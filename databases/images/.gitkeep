@@ -1,0 +1,3 @@
+Upload site photos here. Files in this folder are served at /images/<filename>.
+Example: databases/images/wash-home-before.jpg -> /images/wash-home-before.jpg
+On Coolify this folder sits on the /app/databases volume, so uploads survive redeploys.

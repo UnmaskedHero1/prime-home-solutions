@@ -11,6 +11,7 @@ from database import Base, engine
 from routes import router
 
 DIST = Path(__file__).resolve().parent / "frontend" / "dist"
+IMAGES = settings.resolved_database_dir / "images"
 log = logging.getLogger("prime")
 
 
@@ -18,6 +19,7 @@ log = logging.getLogger("prime")
 async def lifespan(_app: FastAPI):
     logging.basicConfig(level=logging.INFO)
     settings.resolved_database_dir.mkdir(parents=True, exist_ok=True)
+    IMAGES.mkdir(parents=True, exist_ok=True)
     import models  # noqa: F401  (register tables)
 
     Base.metadata.create_all(bind=engine)
@@ -33,6 +35,19 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 app.include_router(router, prefix="/api")
+
+
+@app.get("/images/{name:path}")
+def uploaded_image(name: str):
+    images = IMAGES.resolve()
+    candidate = (images / name).resolve()
+    try:
+        candidate.relative_to(images)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Not found") from None
+    if not candidate.is_file():
+        raise HTTPException(status_code=404, detail="Not found")
+    return FileResponse(candidate)
 
 
 @app.get("/{full_path:path}")

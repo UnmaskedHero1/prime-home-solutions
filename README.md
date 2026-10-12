@@ -25,7 +25,9 @@ Copy `.env.example` to `.env` if you want to change the database folder or CORS 
 
 ## Photos
 
-Image spots are placeholders until real pictures are added. Drop files into `frontend/public/photos/` and set the paths in `frontend/src/content.js` (`pressureWashing` before/after, `lighting` items).
+Image spots are placeholders until real pictures are added. Upload files to `databases/images/` and they are served at `/images/<filename>`. Then set the paths in `frontend/src/content.js` (`pressureWashing` before/after, `lighting` items), for example `"/images/wash-home-before.jpg"`.
+
+On Coolify, `databases/images/` sits on the `/app/databases` volume, so uploads survive redeploys. Pictures can also be committed to `frontend/public/photos/` and used as `/photos/<filename>`.
 
 ## Hidden page
 

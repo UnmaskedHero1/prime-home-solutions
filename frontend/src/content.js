@@ -44,8 +44,9 @@ export const serviceOptions = serviceFamilies.flatMap((family) =>
   family.options.map((option) => `${family.name} · ${option.audience}`)
 );
 
-// Set `before` and `after` to image paths (for example "/photos/wash-home-before.jpg")
-// once the pressure washing pictures are added to frontend/public/photos.
+// Set `before` and `after` to image paths once the pictures are uploaded.
+// Files in databases/images/ are served at /images/<filename>,
+// for example "/images/wash-home-before.jpg".
 export const pressureWashing = [
   {
     title: "Homes",
