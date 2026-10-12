@@ -29,6 +29,8 @@ Go to `/admin` and sign in with `ADMIN_PASSWORD` to change the photos on the sit
 
 Default photos ship in `frontend/public/photos/` and show until a spot gets an upload. Files in `databases/images/` are served at `/images/<filename>`.
 
+The admin page shows what is live in each spot (your upload, the default photo, or a placeholder). Below the spots is a **Gallery photos** section: anything added there appears in the gallery on the home page alongside every work photo already on the page. Gallery entries live in the `gallery_photos` table.
+
 Set `ADMIN_PASSWORD` in Coolify's environment variables. Without it, `/admin` cannot sign in.
 
 ## Hidden page

@@ -4,14 +4,14 @@ import secrets
 import time
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, File, HTTPException, Request, Response, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
 from PIL import Image, ImageOps, UnidentifiedImageError
 from sqlalchemy.orm import Session
 
 from config import settings
 from database import get_db
-from models import AdminSession, SiteImage
-from schemas import LoginIn, SlotOut, UseFileIn
+from models import AdminSession, GalleryPhoto, SiteImage
+from schemas import GalleryAddIn, GalleryPhotoOut, LoginIn, SlotOut, UseFileIn
 from slots import SLOTS
 
 router = APIRouter()
@@ -78,20 +78,32 @@ def _images_dir():
 
 
 def _remove_if_unused(db: Session, filename: str) -> None:
-    still_used = db.query(SiteImage).filter(SiteImage.filename == filename).count()
-    if still_used:
+    in_slot = db.query(SiteImage).filter(SiteImage.filename == filename).count()
+    in_gallery = db.query(GalleryPhoto).filter(GalleryPhoto.filename == filename).count()
+    if in_slot or in_gallery:
         return
-    if not filename.startswith("slot-"):
+    if not filename.startswith(("slot-", "gallery-")):
         return  # only clean up files the admin upload created
     path = _images_dir() / filename
     if path.is_file():
         path.unlink()
 
 
+def _gallery_out(row: GalleryPhoto) -> GalleryPhotoOut:
+    return GalleryPhotoOut(id=row.id, url=_url_for(row.filename), filename=row.filename, caption=row.caption)
+
+
+def _gallery_rows(db: Session) -> list[GalleryPhoto]:
+    return db.query(GalleryPhoto).order_by(GalleryPhoto.created_at.desc(), GalleryPhoto.id.desc()).all()
+
+
 @router.get("/gallery")
 def gallery(db: Session = Depends(get_db)):
     rows = _slot_rows(db)
-    return {slot: _url_for(row.filename) for slot, row in rows.items() if slot in SLOTS}
+    return {
+        "slots": {slot: _url_for(row.filename) for slot, row in rows.items() if slot in SLOTS},
+        "photos": [_gallery_out(row).model_dump() for row in _gallery_rows(db)],
+    }
 
 
 @router.post("/admin/login")
@@ -164,6 +176,21 @@ def list_files(_: AdminSession = Depends(require_admin)):
     return {"files": files}
 
 
+def _read_upload(data: bytes) -> bytes:
+    if len(data) > settings.max_upload_mb * 1024 * 1024:
+        raise HTTPException(status_code=413, detail=f"Keep uploads under {settings.max_upload_mb} MB.")
+    if not data:
+        raise HTTPException(status_code=400, detail="The file was empty.")
+    return _process_upload(data)
+
+
+def _existing_file(name: str) -> str:
+    name = name.strip()
+    if not SAFE_NAME.match(name) or not (_images_dir() / name).is_file():
+        raise HTTPException(status_code=404, detail="That file is not in the images folder.")
+    return name
+
+
 def _process_upload(data: bytes) -> bytes:
     try:
         image = Image.open(io.BytesIO(data))
@@ -186,13 +213,7 @@ async def upload_image(
     db: Session = Depends(get_db),
 ):
     _check_slot(slot)
-    data = await file.read()
-    if len(data) > settings.max_upload_mb * 1024 * 1024:
-        raise HTTPException(status_code=413, detail=f"Keep uploads under {settings.max_upload_mb} MB.")
-    if not data:
-        raise HTTPException(status_code=400, detail="The file was empty.")
-
-    processed = _process_upload(data)
+    processed = _read_upload(await file.read())
     filename = f"slot-{slot}-{int(time.time())}.jpg"
     (_images_dir() / filename).write_bytes(processed)
 
@@ -217,9 +238,7 @@ def use_existing(
     db: Session = Depends(get_db),
 ):
     _check_slot(slot)
-    name = payload.filename.strip()
-    if not SAFE_NAME.match(name) or not (_images_dir() / name).is_file():
-        raise HTTPException(status_code=404, detail="That file is not in the images folder.")
+    name = _existing_file(payload.filename)
 
     row = db.get(SiteImage, slot)
     old = row.filename if row else None
@@ -238,6 +257,59 @@ def use_existing(
 def clear_slot(slot: str, _: AdminSession = Depends(require_admin), db: Session = Depends(get_db)):
     _check_slot(slot)
     row = db.get(SiteImage, slot)
+    if row:
+        old = row.filename
+        db.delete(row)
+        db.commit()
+        _remove_if_unused(db, old)
+    return {"ok": True}
+
+
+# --- Gallery-only photos -------------------------------------------------
+
+
+@router.get("/admin/gallery", response_model=list[GalleryPhotoOut])
+def list_gallery(_: AdminSession = Depends(require_admin), db: Session = Depends(get_db)):
+    return [_gallery_out(row) for row in _gallery_rows(db)]
+
+
+@router.post("/admin/gallery", response_model=GalleryPhotoOut)
+async def upload_gallery(
+    file: UploadFile = File(...),
+    caption: str = Form(""),
+    _: AdminSession = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    processed = _read_upload(await file.read())
+    filename = f"gallery-{int(time.time() * 1000)}.jpg"
+    (_images_dir() / filename).write_bytes(processed)
+
+    row = GalleryPhoto(filename=filename, caption=caption.strip()[:160])
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return _gallery_out(row)
+
+
+@router.post("/admin/gallery/use", response_model=GalleryPhotoOut)
+def add_gallery_existing(
+    payload: GalleryAddIn,
+    _: AdminSession = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    name = _existing_file(payload.filename)
+    if db.query(GalleryPhoto).filter(GalleryPhoto.filename == name).count():
+        raise HTTPException(status_code=409, detail="That file is already in the gallery.")
+    row = GalleryPhoto(filename=name, caption=payload.caption.strip())
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return _gallery_out(row)
+
+
+@router.delete("/admin/gallery/{photo_id}")
+def remove_gallery(photo_id: int, _: AdminSession = Depends(require_admin), db: Session = Depends(get_db)):
+    row = db.get(GalleryPhoto, photo_id)
     if row:
         old = row.filename
         db.delete(row)

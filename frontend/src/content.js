@@ -120,6 +120,28 @@ export const landscaping = {
   ],
 };
 
+// Every work photo spot on the home page, in page order, with a caption for
+// the gallery. The owner portrait and the hidden landscaping page are left out.
+export const sitePhotos = [
+  ...Object.entries(comparisons).flatMap(([key, items]) =>
+    items.flatMap((item) => {
+      const family = key === "pressure-washing" ? "Pressure Washing" : "Painting";
+      return [
+        { photo: item.before, caption: `${family} · ${item.title} · Before` },
+        { photo: item.after, caption: `${family} · ${item.title} · After` },
+      ];
+    })
+  ),
+  ...singles.map((item) => ({ photo: item.photo, caption: `${item.title} · ${item.audience}` })),
+];
+
+// Default image for each slot (what the site shows when nothing is uploaded).
+export const defaultPhotos = Object.fromEntries(
+  [...sitePhotos.map((item) => item.photo), ...landscaping.photos.map((item) => item.photo), ownerPhoto]
+    .filter((photo) => photo.src)
+    .map((photo) => [photo.slot, photo.src])
+);
+
 export const reviews = [
   {
     name: "Andrea",

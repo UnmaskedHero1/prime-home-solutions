@@ -42,3 +42,15 @@ class SlotOut(BaseModel):
     label: str
     url: str | None
     filename: str | None
+
+
+class GalleryAddIn(BaseModel):
+    filename: str = Field(max_length=255)
+    caption: str = Field(default="", max_length=160)
+
+
+class GalleryPhotoOut(BaseModel):
+    id: int
+    url: str
+    filename: str
+    caption: str

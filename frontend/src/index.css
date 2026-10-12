@@ -606,6 +606,55 @@ h3 {
   margin-top: 1.6rem;
 }
 
+.gallery {
+  padding: 1rem 0 4.2rem;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+  margin-top: 1.6rem;
+}
+
+.gallery-tile {
+  margin: 0;
+  will-change: transform;
+}
+
+.gallery-frame {
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #d9d3c7;
+}
+
+.gallery-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.gallery-tile:hover .gallery-frame img {
+  transform: scale(1.04);
+}
+
+.gallery-tile figcaption {
+  margin-top: 0.4rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.gallery-empty {
+  aspect-ratio: 3 / 1;
+  overflow: hidden;
+  margin-top: 1.6rem;
+  border-radius: 16px;
+}
+
 .compare-after {
   clip-path: inset(0 0 0 50%);
 }
@@ -824,6 +873,11 @@ h3 {
   .feature-grid {
     grid-template-columns: 1fr 1fr 1fr;
   }
+
+  .gallery-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.9rem;
+  }
 }
 
 @media (min-width: 900px) {
@@ -1015,7 +1069,7 @@ h3 {
 
 .admin-status {
   min-height: 1.4rem;
-  margin: 0.4rem 0 1.2rem;
+  margin: 0 0 1rem;
   color: var(--ok);
   font-weight: 600;
 }
@@ -1043,22 +1097,75 @@ h3 {
 }
 
 .slot-preview {
-  display: grid;
-  place-items: center;
+  position: relative;
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  padding: 0.6rem;
   border-radius: 12px;
   background: #e9e3d6;
-  color: var(--muted);
-  font-size: 0.88rem;
-  text-align: center;
 }
 
 .slot-preview img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.slot-preview .photo-slot {
+  min-height: 0;
+}
+
+.slot-badge {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.6rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(14, 34, 64, 0.88);
+  color: var(--white);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.admin-section + .admin-section {
+  margin-top: 3.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid rgba(14, 34, 64, 0.1);
+}
+
+.admin-section .slot-grid {
+  margin-top: 1.4rem;
+}
+
+.gallery-add {
+  display: grid;
+  gap: 0.8rem;
+  align-items: end;
+  margin-top: 1.2rem;
+  padding: 1rem;
+  background: var(--white);
+  border-radius: 18px;
+  box-shadow: 0 14px 32px rgba(14, 34, 64, 0.06);
+}
+
+.gallery-caption {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+}
+
+.gallery-caption input {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid rgba(14, 34, 64, 0.18);
+  border-radius: 10px;
+  font: inherit;
+}
+
+@media (min-width: 720px) {
+  .gallery-add {
+    grid-template-columns: 1.4fr auto 1fr;
+  }
 }
 
 .slot-file {

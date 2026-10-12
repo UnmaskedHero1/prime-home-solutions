@@ -58,7 +58,7 @@ export function useSiteMotion(rootRef) {
           );
         });
 
-        q(".service-card, .light-tile, .compare, .feature-card, .form").forEach((card) => {
+        q(".service-card, .light-tile, .compare, .feature-card, .gallery-tile, .form").forEach((card) => {
           gsap.fromTo(
             card,
             { y: lift, autoAlpha: 0 },

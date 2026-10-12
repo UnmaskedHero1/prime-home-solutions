@@ -18,6 +18,17 @@ class SiteImage(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
 
+class GalleryPhoto(Base):
+    """Extra photos that only appear in the gallery (not tied to a slot)."""
+
+    __tablename__ = "gallery_photos"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    filename: Mapped[str] = mapped_column(String(255))
+    caption: Mapped[str] = mapped_column(String(160), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+
 class AdminSession(Base):
     __tablename__ = "admin_sessions"
 

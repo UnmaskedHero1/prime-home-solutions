@@ -10,8 +10,9 @@ import {
   serviceFamilies,
   serviceOptions,
   singles,
+  sitePhotos,
 } from "./content.js";
-import { GalleryProvider, usePhoto } from "./gallery.jsx";
+import { GalleryProvider, resolvePhoto, useGallery, usePhoto } from "./gallery.jsx";
 import { useSiteMotion } from "./useSiteMotion.js";
 
 const emptyForm = {
@@ -25,6 +26,7 @@ const emptyForm = {
 const homeLinks = [
   { href: "#services", label: "Services" },
   { href: "#pressure-washing", label: "Work" },
+  { href: "#gallery", label: "Gallery" },
   { href: "#owner", label: "Owner" },
   { href: "#reviews", label: "Reviews" },
   { href: "#contact", label: "Contact" },
@@ -85,6 +87,7 @@ function HomePage() {
           items={comparisons.painting}
         />
         <Singles />
+        <Gallery />
         <Charlotte />
         <Owner />
         <Reviews />
@@ -318,6 +321,52 @@ function Singles() {
             </figure>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+function Gallery() {
+  const { slots, photos } = useGallery();
+  const seen = new Set();
+  const items = [];
+  for (const item of sitePhotos) {
+    const src = resolvePhoto(slots, item.photo);
+    if (src && !seen.has(src)) {
+      seen.add(src);
+      items.push({ key: item.photo.slot, src, caption: item.caption });
+    }
+  }
+  for (const photo of photos) {
+    if (!seen.has(photo.url)) {
+      seen.add(photo.url);
+      items.push({ key: `g-${photo.id}`, src: photo.url, caption: photo.caption });
+    }
+  }
+
+  return (
+    <section className="gallery" id="gallery">
+      <div className="container">
+        <p className="eyebrow">Gallery</p>
+        <h2>The work, all in one place.</h2>
+        <span className="reveal-rule" aria-hidden="true" />
+        <p className="lede">Every job photo from the page, plus more from around Charlotte.</p>
+        {items.length ? (
+          <div className="gallery-grid">
+            {items.map((item) => (
+              <figure className="gallery-tile" key={item.key}>
+                <div className="gallery-frame">
+                  <img src={item.src} alt={item.caption || "Job photo"} loading="lazy" />
+                </div>
+                {item.caption ? <figcaption>{item.caption}</figcaption> : null}
+              </figure>
+            ))}
+          </div>
+        ) : (
+          <div className="gallery-empty">
+            <PhotoSlot label="Photos coming soon" />
+          </div>
+        )}
       </div>
     </section>
   );
